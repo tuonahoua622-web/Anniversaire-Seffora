@@ -413,6 +413,7 @@
       <p class="kicker">À ouvrir doucement</p>
       <h2 class="title">Trois lettres</h2>
       <div class="letters-stage" id="letters-stage"></div>
+      <button class="btn" id="btn-to-finale">Terminer</button>
     </div>
   </section>
 
@@ -597,7 +598,8 @@
 
   /* ---------- Global controls ---------- */
   document.getElementById("btn-welcome").addEventListener("click", function(){ goTo("s-transition"); });
-  document.getElementById("btn-enter-letters").addEventListener("click", function(){ goTo("s-finale"); });
+  document.getElementById("btn-enter-letters").addEventListener("click", function(){ goTo("s-letters"); });
+  document.getElementById("btn-to-finale").addEventListener("click", function(){ goTo("s-finale"); });
 
   document.getElementById("s-transition").addEventListener("click", function(e){
     if (e.target.closest("#s-transition")) goTo("s-intro");
