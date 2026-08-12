@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#6d2230" />
+<meta name="description" content="Une petite surprise pour Seffora, en ce jour si doux." />
+<title>Pour Seffora</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236d2230' d='M12 21s-8-4.9-8-11a5 5 0 0 1 9.5-1.8A5 5 0 0 1 23 10c0 6.1-11 11-11 11z'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  /* ---------- Base ---------- */
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:var(--font-serif);
+    background:
+      radial-gradient(1100px 700px at 78% -10%, rgba(199,168,120,.16), transparent 62%),
+      radial-gradient(900px 640px at -8% 108%, rgba(230,198,203,.34), transparent 62%),
+      linear-gradient(180deg, #fdfaf4 0%, var(--bg) 46%, #f7efe4 100%);
+    color:var(--fg-2);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{ /* fine paper grain */
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  }
+  button{ font-family:inherit; }
+
+  :focus-visible{ outline:none; box-shadow:var(--focus-ring); border-radius:var(--radius-pill); }
+
+  /* ---------- Floating ambiance ---------- */
+  .ambiance{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+  .ambiance span{
+    position:absolute; border-radius:50%; filter:blur(56px);
+    opacity:0; will-change:transform,opacity;
+  }
+  .ambiance span:nth-child(1){
+    width:46vmax; height:46vmax; left:-12vmax; top:-14vmax;
+    background:radial-gradient(circle, rgba(230,198,203,.55), transparent 70%);
+    animation:drift 26s var(--ease-standard) infinite;
+  }
+  .ambiance span:nth-child(2){
+    width:40vmax; height:40vmax; right:-14vmax; bottom:-12vmax;
+    background:radial-gradient(circle, rgba(201,172,120,.34), transparent 70%);
+    animation:drift 32s var(--ease-standard) infinite reverse;
+  }
+  .ambiance span:nth-child(3){
+    width:26vmax; height:26vmax; left:26vw; bottom:10vh;
+    background:radial-gradient(circle, rgba(109,34,48,.14), transparent 70%);
+    animation:drift 38s var(--ease-standard) infinite;
+  }
+  @keyframes drift{
+    0%{ transform:translate(0,0) scale(1); opacity:0; }
+    12%{ opacity:1; }
+    88%{ opacity:1; }
+    100%{ transform:translate(6vw,-8vh) scale(1.08); opacity:0; }
+  }
+  body.theme-welcome .ambiance span:nth-child(1), body.theme-welcome .ambiance span:nth-child(2){ display:none; }
+
+  /* ---------- Veil for screen transitions ---------- */
+  .veil{
+    position:fixed; inset:0; z-index:900; pointer-events:none;
+    background:linear-gradient(180deg, #fdfaf4, var(--bg) 52%, #f6ecdd);
+    opacity:0; transition:opacity .45s var(--ease-standard);
+  }
+  .veil.on{ opacity:1; pointer-events:auto; }
+
+  /* ---------- Screens ---------- */
+  .screen{
+    position:fixed; inset:0; z-index:1;
+    display:flex; align-items:safe center; justify-content:safe center;
+    padding:var(--space-8) 24px calc(var(--space-8) + env(safe-area-inset-bottom));
+    text-align:center;
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .85s var(--ease-standard), visibility 0s .85s;
+  }
+  #s-transition, #s-letters{ overflow-y:auto; }
+  .screen.active{ opacity:1; visibility:visible; pointer-events:auto; transition:opacity .85s var(--ease-standard); }
+  .screen .inner{ max-width:640px; }
+
+  .kicker{
+    font-family:var(--font-serif); font-size:var(--text-xs);
+    letter-spacing:.38em; text-transform:uppercase; color:var(--gold);
+    margin-bottom:var(--space-6);
+  }
+  .title{
+    font-family:var(--font-script); font-weight:400;
+    color:var(--bordeaux); line-height:1.15;
+    font-size:clamp(2.6rem, 11vw, 4.6rem);
+    text-shadow:0 1px 0 rgba(255,255,255,.6);
+  }
+  .sub{
+    margin:var(--space-6) auto 0; max-width:34ch;
+    font-size:clamp(1.06rem, 3.6vw, 1.3rem); font-style:italic;
+    color:var(--muted); line-height:1.6;
+  }
+  .divider{
+    width:min(200px, 56%); height:1px; margin:var(--space-8) auto;
+    background:linear-gradient(90deg, transparent, var(--gold-faint), transparent);
+    position:relative;
+  }
+  .divider::after{
+    content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) rotate(45deg);
+    width:7px; height:7px; background:var(--gold-soft); border:1px solid var(--gold-faint);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    margin-top:var(--space-8);
+    padding:14px 38px;
+    border:1px solid var(--gold-faint); border-radius:var(--radius-pill);
+    background:rgba(255,255,255,.35); color:var(--bordeaux);
+    font-family:var(--font-serif); font-size:var(--text-base);
+    letter-spacing:.18em; text-transform:uppercase;
+    cursor:pointer; position:relative; overflow:hidden;
+    transition:background .45s var(--ease-standard), color .45s var(--ease-standard),
+               border-color .45s var(--ease-standard), transform .45s var(--ease-standard),
+               box-shadow .45s var(--ease-standard);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn::after{
+    content:""; position:absolute; inset:0; border-radius:inherit;
+    background:linear-gradient(120deg, transparent, rgba(255,253,248,.5), transparent);
+    transform:translateX(-130%) skewX(-18deg); transition:transform .9s var(--ease-standard);
+  }
+  .btn:hover, .btn:focus-visible{
+    background:var(--bordeaux); color:#fdf6ef; border-color:var(--bordeaux-deep);
+    transform:translateY(-2px); box-shadow:0 14px 30px rgba(72,19,32,.22);
+  }
+  .btn:hover::after, .btn:focus-visible::after{ transform:translateX(130%) skewX(-18deg); }
+  .btn:active{ transform:translateY(0) scale(.98); }
+
+  /* reveal-on-activate */
+  .screen .inner > *{ opacity:0; transform:translateY(16px); filter:blur(6px); }
+  .screen.active .inner > *{ animation:rise .9s var(--ease-standard) forwards; }
+  .screen.active .inner > *:nth-child(1){ animation-delay:.18s }
+  .screen.active .inner > *:nth-child(2){ animation-delay:.46s }
+  .screen.active .inner > *:nth-child(3){ animation-delay:.72s }
+  .screen.active .inner > *:nth-child(4){ animation-delay:.98s }
+  @keyframes rise{ to{ opacity:1; transform:none; filter:none; } }
+
+  /* transition screen – soft pulling light */
+  #s-transition .title{ font-size:clamp(2.2rem, 9vw, 3.8rem); }
+  #s-transition::before{
+    content:""; position:absolute; left:50%; top:42%; width:min(340px,64vw); aspect-ratio:1;
+    transform:translate(-50%,-50%); border-radius:50%;
+    background:radial-gradient(circle, rgba(255,250,242,.9), rgba(230,198,203,.35) 55%, transparent 72%);
+    filter:blur(10px);
+    animation:breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe{ 0%,100%{ opacity:.75; transform:translate(-50%,-50%) scale(1);} 50%{ opacity:1; transform:translate(-50%,-50%) scale(1.07);} }
+  .s-hint{
+    margin-top:var(--space-8); font-size:var(--text-sm); font-style:italic; color:var(--gold-faint); letter-spacing:.06em;
+  }
+
+  /* ---------- Letters screen ---------- */
+  #s-letters .inner{ max-width:1040px; }
+  .letters-stage{
+    position:relative; display:flex; flex-direction:column; align-items:center;
+    gap:34px; margin-top:var(--space-8);
+  }
+  .env{
+    position:relative; width:min(76vw, 300px); aspect-ratio:320/190;
+    cursor:pointer; perspective:900px; -webkit-tap-highlight-color:transparent;
+    transform:rotate(var(--tilt)); transition:transform .5s var(--ease-standard), filter .5s var(--ease-standard);
+  }
+  .env:nth-of-type(1){ --tilt:-1.6deg; }
+  .env:nth-of-type(2){ --tilt:.8deg; }
+  .env:nth-of-type(3){ --tilt:-0.4deg; }
+  .env:hover, .env:focus-visible, .env.touched{ transform:rotate(0) translateY(-12px); filter:drop-shadow(0 26px 28px rgba(72,19,32,.18)); }
+  .env:focus-visible{ outline:none; }
+  .env.shadow-below{ pointer-events:none; }
+
+  .env-body{
+    position:absolute; inset:0; border-radius:12px;
+    background:linear-gradient(160deg, #f4e7cf 0%, #ecd9b8 60%, #e2cba6 100%);
+    border:1px solid rgba(109,34,48,.1);
+    box-shadow:var(--shadow-env), inset 0 2px 3px rgba(255,255,255,.7), inset 0 -14px 26px rgba(124,85,40,.16);
+    overflow:hidden;
+  }
+  .env-crease{ /* front pocket hint above the flap point */
+    position:absolute; top:0; left:0; right:0; height:56%;
+    background:linear-gradient(180deg, rgba(109,34,48,.07), transparent 80%);
+    clip-path:polygon(0 0, 100% 0, 50% 97%);
+  }
+  .env-flap{
+    position:absolute; top:0; left:0; right:0; height:56%;
+    background:linear-gradient(200deg, #f6e9d0 0%, #ead6b2 55%, #dcc49c 100%);
+    border-bottom:1px solid rgba(124,85,40,.16);
+    clip-path:polygon(0 0, 100% 0, 50% 98%);
+    transform-origin:top center;
+    transform:rotateX(180deg);
+    transition:transform .85s cubic-bezier(.34,.1,.2,1);
+    z-index:3;
+  }
+  .env:not(.open) .env-flap{ transform:rotateX(0deg); }
+  .env.open .env-flap{ transform:rotateX(180deg); }
+
+  .env-seal{
+    position:absolute; left:50%; top:calc(50% - 6px); transform:translate(-50%,-50%);
+    width:58px; height:58px; border-radius:50%; z-index:4;
+    background:radial-gradient(circle at 34% 28%, #8a3345, var(--bordeaux) 52%, var(--bordeaux-deep) 100%);
+    border:2.5px solid var(--gold-soft); box-shadow:0 4px 12px rgba(40,10,16,.4), inset 0 2px 4px rgba(255,255,255,.22);
+    display:grid; place-items:center;
+    font-family:var(--font-script); color:var(--gold-soft); font-size:24px; line-height:1;
+    transition:transform .5s var(--ease-standard), box-shadow .5s var(--ease-standard);
+  }
+  .env:hover .env-seal, .env:focus-visible .env-seal{ transform:translate(-50%,-50%) scale(1.06); box-shadow:0 6px 16px rgba(40,10,16,.45), 0 0 0 6px rgba(233,216,181,.28); }
+  .env.open .env-seal{ transform:translate(-50%,-50%) scale(.9); opacity:.85; }
+
+  .env-label{
+    position:absolute; left:0; right:0; bottom:12px; text-align:center; z-index:2;
+    font-size:var(--text-sm); letter-spacing:.34em; text-transform:uppercase;
+    color:var(--bordeaux); opacity:.85;
+  }
+  .env-stamp{
+    position:absolute; top:12px; right:12px; z-index:2;
+    width:26px; height:32px; border:1px dashed var(--gold-faint); border-radius:3px;
+    display:grid; place-items:center; font-size:12px; color:var(--gold);
+  }
+
+  /* ---------- Letter full-screen view ---------- */
+  .letter-view{
+    position:fixed; inset:0; z-index:950;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    background:
+      radial-gradient(800px 600px at 50% -10%, rgba(233,216,181,.18), transparent 60%),
+      linear-gradient(180deg, rgba(72,19,32,.86), rgba(66,17,29,.94));
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .65s var(--ease-standard), visibility 0s .65s;
+  }
+  .letter-view.show{ opacity:1; visibility:visible; pointer-events:auto; transition:opacity .65s var(--ease-standard); }
+  .letter-sheet{
+    position:relative; width:min(94vw, 660px); max-height:86dvh; overflow-y:auto;
+    background:
+      radial-gradient(560px 420px at 85% 0%, rgba(233,216,181,.2), transparent 60%),
+      linear-gradient(180deg, #fffdf8, #fdf6ec 100%);
+    border:1px solid rgba(192,160,92,.4); border-radius:10px;
+    box-shadow:var(--shadow-sheet), 0 1px 0 rgba(255,255,255,.8) inset;
+    padding:clamp(30px, 7vw, 52px) clamp(22px, 6vw, 48px) clamp(28px, 6vw, 44px);
+    text-align:center;
+    opacity:0; transform:translateY(26px) scale(.965); filter:blur(4px);
+    transition:opacity .6s var(--ease-standard), transform .6s var(--ease-standard), filter .6s var(--ease-standard);
+  }
+  .letter-view.show .letter-sheet{ opacity:1; transform:none; filter:none; }
+  .letter-sheet::-webkit-scrollbar{ width:8px; }
+  .letter-sheet::-webkit-scrollbar-thumb{ background:rgba(192,160,92,.45); border-radius:8px; }
+  .letter-sheet::-webkit-scrollbar-track{ background:transparent; }
+
+  .letter-numeral{
+    font-family:var(--font-script); color:var(--gold); font-size:clamp(2.4rem, 9vw, 3.2rem); line-height:1;
+  }
+  .letter-heading{
+    margin-top:6px; font-family:var(--font-script); font-weight:400;
+    color:var(--bordeaux); font-size:clamp(1.7rem, 6vw, 2.3rem); line-height:1.2;
+  }
+  .letter-kicker{
+    margin:10px auto 0; font-size:var(--text-xs); letter-spacing:.34em; text-transform:uppercase; color:var(--meta);
+  }
+  .letter-orn{
+    width:110px; height:1px; margin:20px auto 0;
+    background:linear-gradient(90deg, transparent, var(--gold-faint), transparent);
+  }
+  .letter-body{
+    margin-top:24px; text-align:left; max-width:46ch; margin-left:auto; margin-right:auto;
+  }
+  .letter-body p{
+    font-size:clamp(1.05rem, 3.4vw, 1.2rem); line-height:1.78; color:var(--fg-2);
+    margin-bottom:1.15em; font-weight:400;
+    opacity:0; transform:translateY(12px); filter:blur(5px);
+    animation:rise .95s var(--ease-standard) forwards;
+  }
+  .letter-back{
+    margin:6px auto 0;
+  }
+
+  @media (min-width: 768px){
+    .letters-stage{ flex-direction:row; justify-content:center; gap:44px; }
+    .env{ width:292px; }
+  }
+  @media (max-height: 560px){
+    .env{ width:min(38vw, 210px); }
+    .letters-stage{ gap:20px; margin-top:var(--space-6); }
+  }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration:.001s !important; transition-duration:.2s !important; }
+    .screen .inner > *, .letter-body p{ opacity:1; transform:none; filter:none; }
+  }
+</style>
+</head>
+<body class="theme-welcome">
+
+  <div class="ambiance" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="veil" id="veil" aria-hidden="true"></div>
+
+  <!-- 1. Accueil -->
+  <section class="screen active" id="s-welcome" aria-label="Écran d'accueil">
+    <div class="inner">
+      <p class="kicker">Pour ton anniversaire</p>
+      <h1 class="title">Seffora</h1>
+      <div class="divider"></div>
+      <p class="sub">Un instant glissé dans le souffle de cette journée qui t'appartient.</p>
+      <button class="btn" id="btn-welcome">Merci</button>
+    </div>
+  </section>
+
+  <!-- 2. Passage émotionnel -->
+  <section class="screen" id="s-transition" aria-label="Transition">
+    <div class="inner">
+      <p class="kicker">Un instant</p>
+      <h2 class="title">Avant de commencer…</h2>
+      <p class="sub">j'ai quelque chose pour toi.</p>
+      <p class="s-hint">appuie n'importe où pour continuer</p>
+    </div>
+  </section>
+
+  <!-- 3. Introduction aux lettres -->
+  <section class="screen" id="s-intro" aria-label="Introduction">
+    <div class="inner">
+      <p class="kicker">Trois enveloppes</p>
+      <h2 class="title">J'ai écrit trois lettres pour toi…</h2>
+      <p class="sub">Elles ne sont pas longues, seulement vraies.</p>
+      <button class="btn" id="btn-enter-letters">Les découvrir</button>
+    </div>
+  </section>
+
+  <!-- 4. Les enveloppes -->
+  <section class="screen" id="s-letters" aria-label="Les trois lettres">
+    <div class="inner">
+      <p class="kicker">À ouvrir doucement</p>
+      <h2 class="title">Trois lettres</h2>
+      <div class="letters-stage" id="letters-stage"></div>
+    </div>
+  </section>
+
+  <!-- 5. Lettre ouverte -->
+  <div class="letter-view" id="letter-view" role="dialog" aria-modal="true" aria-label="Lettre ouverte">
+    <article class="letter-sheet" id="letter-sheet">
+      <p class="letter-numeral" id="letter-numeral"></p>
+      <h3 class="letter-heading" id="letter-heading"></h3>
+      <p class="letter-kicker" id="letter-kicker"></p>
+      <div class="letter-orn" aria-hidden="true"></div>
+      <div class="letter-body" id="letter-body"></div>
+      <button class="btn letter-back" id="letter-back">Retour</button>
+    </article>
+  </div>
+
+<script type="application/json" id="letter-data">
+{
+  "letters": [
+    {
+      "title": "Lettre 1",
+      "tag": "Premier texte",
+      "numeral": "I",
+      "lines": [
+        "Je t'aime, je t'attends Tu es la meilleure chose qui me soit arrivée Mais aussi la pire chose qui me soit arrivée Ce jour où je t'ai rencontrée, j'aurais peut-être préféré Que ce jour ne soit jamais arrivé La pire des bénédictions La plus belle des malédictions De toi, je devrais m'éloigner Mais comme dit le dicton : \"Plutôt qu'être seul, mieux vaut être mal accompagné\"",
+        "Tu sais ce que l'on dit Sois près de tes amis les plus chers Mais aussi Encore plus près de tes adversaires",
+        "Mais ma meilleure ennemie c'est toi Fuis-moi, le pire c'est toi et moi Mais si tu cherches encore ma voix Fuis-moi, le pire c'est toi et moi",
+        "Pourquoi ton prénom me blesse Quand il se cache juste là dans l'espace ? C'est quelle émotion, la douceur, quand j'entends ton prénom ?",
+        "Je t'avais dit : \"Ne regarde pas en arrière\" Le passé qui te suit te fait la guerre",
+        "Mais ma meilleure ennemie c'est toi Fuis-moi, le pire c'est toi et moi Mais si tu cherches encore ma voix Oublie-moi, le pire c'est toi et moi",
+        "You who I pray to, I desolate too Consecrate you Hum a hymn to, Scylla, I swim to Watch a whirlpool spin and jump into You know you make me wanna run away Kingdom come, you make me wanna stay",
+        "Magnify you, sanctify you, glorify You make me wanna die too",
+        "Mais ma meilleure ennemie c'est toi Fuis-moi, le pire c'est toi et moi, et moi Mais ma meilleure ennemie c'est toi Fuis-moi, le pire c'est toi et moi, et moi"
+      ]
+    },
+    {
+      "title": "Lettre 2",
+      "tag": "Deuxième texte",
+      "numeral": "II",
+      "lines": [
+        "Je ne vois que toi dans la fête, il faut que je trouve quelque chose à dire Si tu veux on peut sortir Je n'ai aucun plan dans la tête, mais j'ai la nuit à t'offrir C'est vrai que vous êtes parfaites mais si je pouvais lire l'avenir",
+        "Je vous dirai que  j'arrive à la même conclusion Ensemble ça ne peut pas marcher Ensemble on risque de tout brûler Parce que toi plus moi c'est inflammable Et c'est pour ça aussi que c'est imbattable J'aime bien les courbes, tu aimes bien les dérapages Et c'est pour ça qu'on est inséparable",
+        "Chaque fois qu'on traîne ensemble Il faut des pompiers, il faut des points d'eau proches de nous Il faut des fenêtres, il faut des issues de secours Et les alarmes qui sonnent tout le temps ça rend fou Moi qui pensais que ça pourrait marcher, je suis désolé"
+      ]
+    },
+    {
+      "title": "Lettre 3",
+      "tag": "Troisième texte",
+      "numeral": "III",
+      "lines": [
+        "Comment te dire que tu es belle Comment lui dire qu'elle restera dans ma tête Je me sens comme dans le ciel Mais je redescends quand je pense à elle",
+        "Encore une journée où je vais penser toute la nuit À ce que tu me disais quand on était ensemble dans mon lit Ça me cause du stress maintenant je suis tout seul dans ma tête Je n'ai plus personne pour me dire d'arrêter quand c'est fini Je suis rendu sur la plage, dans ma tête je suis ailleurs Complètement arraché de la soirée d'hier Je m'ennuie du temps où ce n'était pas comme ça Maintenant tu es loin de moi, maintenant tu es loin puis je ne sais pas trop",
+        "Comment te dire que tu es belle Comment lui dire qu'elle restera dans ma tête Je me sens comme dans le ciel Mais je redescends quand je pense à elle",
+        "J'attends la journée où mon téléphone sonne toute la nuit Pour que ça soit toi qui me dises qu'il fait froid quand tu es seule dans ton lit Bien sûr je te dirai que ces jours-ci je vais bien Mais je n'ai même pas fait la vaisselle depuis le jour où tu es partie Maintenant je suis rendu sur la plage, dans ma tête je suis ailleurs Complètement arraché de la soirée d'hier Je m'ennuie du temps où ce n'était pas comme ça Maintenant tu es loin de moi, maintenant tu es loin puis je ne sais pas trop"
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  var LETTERS = JSON.parse(document.getElementById("letter-data").textContent).letters;
+
+  var veil = document.getElementById("veil");
+  var body = document.body;
+  var screens = document.querySelectorAll(".screen");
+  var transitionTimer = null;
+
+  /* ---------- Screen navigation ---------- */
+  function goTo(id){
+    if (body.dataset.busy === "1") return;
+    body.dataset.busy = "1";
+    body.classList.toggle("theme-welcome", id === "s-welcome");
+    veil.classList.add("on");
+    window.clearTimeout(transitionTimer);
+    transitionTimer = window.setTimeout(function(){
+      screens.forEach(function(s){ s.classList.remove("active"); });
+      var target = document.getElementById(id);
+      target.classList.add("active");
+      window.setTimeout(function(){
+        veil.classList.remove("on");
+        body.dataset.busy = "0";
+        if (id === "s-transition") armAutoAdvance();
+      }, 500);
+    }, 450);
+  }
+
+  function armAutoAdvance(){
+    window.clearTimeout(transitionTimer);
+    transitionTimer = window.setTimeout(function(){
+      var cur = document.querySelector(".screen.active");
+      if (cur && cur.id === "s-transition") goTo("s-intro");
+    }, 5200);
+  }
+
+  /* ---------- Rendering envelopes ---------- */
+  var stage = document.getElementById("letters-stage");
+  LETTERS.forEach(function(letter, i){
+    var env = document.createElement("div");
+    env.className = "env";
+    env.setAttribute("role", "button");
+    env.setAttribute("tabindex", "0");
+    env.setAttribute("aria-label", "Ouvrir la lettre " + (i + 1));
+
+    var bodyEl = document.createElement("div"); bodyEl.className = "env-body";
+    var crease = document.createElement("div"); crease.className = "env-crease";
+    var flap = document.createElement("div"); flap.className = "env-flap";
+    var seal = document.createElement("div"); seal.className = "env-seal"; seal.textContent = letter.numeral;
+    var label = document.createElement("div"); label.className = "env-label"; label.textContent = "Lettre " + (i + 1);
+    var stamp = document.createElement("div"); stamp.className = "env-stamp"; stamp.textContent = "♥";
+
+    bodyEl.appendChild(crease);
+    env.appendChild(bodyEl);
+    env.appendChild(stamp);
+    env.appendChild(seal);
+    env.appendChild(flap);
+    env.appendChild(label);
+
+    function fire(){ openLetter(i, env); }
+
+    env.addEventListener("click", fire);
+    env.addEventListener("keydown", function(e){
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); fire(); }
+    });
+    stage.appendChild(env);
+  });
+
+  /* ---------- Opening a letter ---------- */
+  var view = document.getElementById("letter-view");
+  var sheet = document.getElementById("letter-sheet");
+  var numeral = document.getElementById("letter-numeral");
+  var heading = document.getElementById("letter-heading");
+  var kicker = document.getElementById("letter-kicker");
+  var letterBody = document.getElementById("letter-body");
+  var currentEnv = null;
+
+  function openLetter(i, env){
+    if (body.dataset.busy === "1") return;
+    body.dataset.busy = "1";
+    currentEnv = env;
+
+    var letter = LETTERS[i];
+    env.classList.add("open");
+    env.classList.add("touched");
+
+    window.setTimeout(function(){
+      numeral.textContent = letter.numeral;
+      heading.textContent = letter.title;
+      kicker.textContent = letter.tag;
+      letterBody.innerHTML = "";
+      letter.lines.forEach(function(line, n){
+        var p = document.createElement("p");
+        p.textContent = line;
+        p.style.animationDelay = (0.35 + n * 0.28) + "s";
+        letterBody.appendChild(p);
+      });
+      view.classList.add("show");
+      sheet.scrollTop = 0;
+      body.dataset.busy = "0";
+    }, 760);
+  }
+
+  function closeLetter(){
+    if (body.dataset.busy === "1") return;
+    body.dataset.busy = "1";
+    view.classList.remove("show");
+
+    window.setTimeout(function(){
+      if (currentEnv){ currentEnv.classList.remove("open"); currentEnv.classList.remove("touched"); }
+      letterBody.innerHTML = "";
+      window.setTimeout(function(){ body.dataset.busy = "0"; }, 420);
+    }, 420);
+  }
+
+  document.getElementById("letter-back").addEventListener("click", closeLetter);
+
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && view.classList.contains("show")) closeLetter();
+  });
+
+  /* ---------- Global controls ---------- */
+  document.getElementById("btn-welcome").addEventListener("click", function(){ goTo("s-transition"); });
+  document.getElementById("btn-enter-letters").addEventListener("click", function(){ goTo("s-letters"); });
+
+  document.getElementById("s-transition").addEventListener("click", function(e){
+    if (e.target.closest("#s-transition")) goTo("s-intro");
+  });
+
+  /* ---------- First frame ---------- */
+  window.setTimeout(function(){ body.dataset.busy = "0"; }, 400);
+})();
+</script>
+</body>
+</html>
