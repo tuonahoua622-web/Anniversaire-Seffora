@@ -343,7 +343,21 @@
   .music-btn.playing{ background:var(--bordeaux); color:#fdf6ef; }
 
   @media (max-width:560px){
-    .pcard{ width:clamp(96px, 32vw, 140px); padding:7px 7px 22px; }
+    .pcard{ width:clamp(92px, 30vw, 130px); padding:6px 6px 20px; opacity:.42; }
+    .pcard::after{ width:24px; bottom:8px; }
+    .kicker{ color:var(--meta); letter-spacing:.3em; }
+    .sub{ color:var(--fg-2); }
+    .music-btn{ right:12px; bottom:12px; width:46px; height:46px; font-size:18px; }
+    .screen .inner{ padding-left:18px; padding-right:18px; }
+    .title{ font-size:clamp(2.4rem, 13vw, 3.6rem); }
+    #s-finale .title{ font-size:clamp(2rem, 11vw, 3.2rem); }
+    #s-transition .title{ font-size:clamp(1.9rem, 10vw, 3rem); }
+  }
+
+  /* Very small phones */
+  @media (max-width:360px){
+    .pcard{ width:clamp(80px, 28vw, 110px); opacity:.38; }
+    .kicker{ font-size:var(--text-xs); }
   }
 
   /* ---------- Reduced motion ---------- */
